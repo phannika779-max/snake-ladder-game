@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>บันไดงู ผจญภัย — เกมกระดานออนไลน์หลายผู้เล่น</title>
+<meta name="description" content="เกมบันไดงูออนไลน์ เล่นได้หลายคนพร้อมกันผ่านมือถือ สแกน QR เข้าร่วมได้ทันที ไม่ต้องสมัครสมาชิก">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="sl-root"><div id="sl-app"></div></div>
+<div id="sl-toast-host"></div>
+
+<!-- Firebase SDK (compat build — simplest to use without a build step) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+
+<!-- Dependency-free QR code generator (Kazuhiko Arase, MIT license) -->
+<script src="qrcode-lib.js"></script>
+
+<!-- Game logic -->
+<script src="app.js"></script>
+</body>
+</html>
