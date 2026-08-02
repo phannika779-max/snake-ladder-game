@@ -23,9 +23,9 @@
   }
 
   /* ============ CONSTANTS ============ */
-  var LADDERS = {4:14, 9:20, 17:27};              // bottom -> top
-  var SNAKES  = {26:12, 21:7, 13:5};               // head -> tail
-  var BONUS   = {6:'extra', 11:'mystery', 19:'swap', 24:'mystery'};
+  var LADDERS = {3:7, 5:7, 8:14, 10:21, 12:28, 16:20, 18:20, 22:27, 24:27, 26:27};   // bottom -> top (10 ladders = 10 question cells)
+  var SNAKES  = {4:2, 6:1, 9:1, 11:1, 15:1, 17:7, 19:14, 23:21, 25:1, 29:2};          // head -> tail (10 snakes = 10 question cells)
+  var BONUS   = {2:'extra', 13:'mystery', 20:'swap', 27:'mystery'};                   // รวม 20 ช่องคำถาม + 4 ช่องโบนัส + 5 ช่องปกติ (1,7,14,21,28) จาก 30 ช่อง
   var AVATARS = ['🐘','🐯','🦁','🐼','🐵','🐸','🦉','🐢','🦚','🐆'];
   var TOKEN_COLORS = ['#FFDB6B','#21B6B6','#FF6B5B','#B06FD6','#7ED957','#FF9F43','#5AD1FF','#F06FA0'];
   var SESSION_KEY = 'sl_session_v1';
