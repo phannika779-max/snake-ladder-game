@@ -30,6 +30,45 @@
   var TOKEN_COLORS = ['#FFDB6B','#21B6B6','#FF6B5B','#B06FD6','#7ED957','#FF9F43','#5AD1FF','#F06FA0'];
   var SESSION_KEY = 'sl_session_v1';
 
+  // ตัวแปรเก็บ Avatar ที่เลือกปัจจุบัน
+var selectedAvatar = AVATARS[0]; // ค่าเริ่มต้นเป็นตัวแรก (🐘)
+
+function selectAvatar(avatar) {
+  // 1. อ่านค่าปัจจุบันในช่อง input เก็บไว้ก่อน
+  var roomInput = document.getElementById('inputRoomCode') || document.querySelector('input[placeholder*="ห้อง"]');
+  var nameInput = document.getElementById('inputPlayerName') || document.querySelector('input[placeholder*="ชื่อ"]');
+  
+  var currentRoom = roomInput ? roomInput.value : '';
+  var currentName = nameInput ? nameInput.value : '';
+
+  // 2. อัปเดตตัวแปร Avatar ที่เลือก
+  selectedAvatar = avatar;
+
+  // 3. ปรับสไตล์ปุ่มโดยไม่ Re-render หน้าจอใหม่ (ป้องกัน Input หาย 100%)
+  var buttons = document.querySelectorAll('.avatar-btn, [data-avatar]');
+  if (buttons.length > 0) {
+    buttons.forEach(function(btn) {
+      var btnText = btn.innerText || btn.getAttribute('data-avatar');
+      if (btnText.indexOf(avatar) !== -1) {
+        btn.style.border = '2px solid #21B6B6';
+        btn.style.transform = 'scale(1.2)';
+        btn.style.background = '#e6f7f7';
+      } else {
+        btn.style.border = '1px solid #ccc';
+        btn.style.transform = 'scale(1)';
+        btn.style.background = 'transparent';
+      }
+    });
+  } else if (typeof render === 'function') {
+    // กรณีที่ระบบบังคับ render ใหม่ ให้ส่งค่าเดิมกลับไปใส่
+    render();
+    var newRoomInput = document.getElementById('inputRoomCode') || document.querySelector('input[placeholder*="ห้อง"]');
+    var newNameInput = document.getElementById('inputPlayerName') || document.querySelector('input[placeholder*="ชื่อ"]');
+    if (newRoomInput) newRoomInput.value = currentRoom;
+    if (newNameInput) newNameInput.value = currentName;
+  }
+}
+
   function cellPos(num){
     var rowFromBottom = Math.floor((num-1)/6);
     var posInRow = (num-1)%6;
@@ -597,24 +636,34 @@
     }).join('');
   }
 
-  function viewPlayerJoin(){
-    var avatars = AVATARS.map(function(a){
-      return '<button class="sl-avatar-opt '+(S._pickedAvatar===a?'picked':'')+'" data-act="pick-avatar" data-av="'+a+'">'+a+'</button>';
-    }).join('');
-    return '<div class="sl-wrap">' +
-      '<span class="sl-eyebrow">เข้าร่วมเกม</span><h2 class="sl-title" style="font-size:26px">กรอกรหัสห้อง</h2>' +
-      '<div class="sl-card" style="max-width:420px;margin-top:16px">' +
-        '<label class="sl-label">รหัสห้อง (4 ตัวอักษร)</label>' +
-        '<input class="sl-input mono" id="pj-code" placeholder="ABCD" maxlength="4" style="text-transform:uppercase;font-size:22px;text-align:center;letter-spacing:0.2em">' +
-        '<label class="sl-label" style="margin-top:14px">ชื่อของคุณ</label>' +
-        '<input class="sl-input" id="pj-name" placeholder="ชื่อเล่น" maxlength="16">' +
-        '<label class="sl-label" style="margin-top:14px">เลือกตัวละคร</label>' +
-        '<div class="sl-avatar-grid">'+avatars+'</div>' +
-        '<button class="sl-btn sl-btn-gold sl-btn-block" style="margin-top:18px" data-act="do-join">เข้าร่วมเกม</button>' +
-        '<button class="sl-btn sl-btn-ghost sl-btn-block" style="margin-top:8px" data-act="home">← กลับ</button>' +
-      '</div>' +
-    '</div>';
-  }
+function viewPlayerJoin(){
+  // 1. อ่านค่าปัจจุบันจากช่องกรอกข้อมูลก่อน (ถ้ามีพิมพ์ค้างไว้)
+  var codeEl = document.getElementById('pj-code');
+  var nameEl = document.getElementById('pj-name');
+  
+  var currentCode = codeEl ? codeEl.value : '';
+  var currentName = nameEl ? nameEl.value : '';
+
+  // 2. สร้างปุ่มเลือก Avatar
+  var avatars = AVATARS.map(function(a){
+    return '<button class="sl-avatar-opt '+(S._pickedAvatar===a?'picked':'')+'" data-act="pick-avatar" data-av="'+a+'">'+a+'</button>';
+  }).join('');
+
+  // 3. นำค่า currentCode และ currentName ใส่คืนใน value="..." ของ input
+  return '<div class="sl-wrap">' +
+    '<span class="sl-eyebrow">เข้าร่วมเกม</span><h2 class="sl-title" style="font-size:26px">กรอกรหัสห้อง</h2>' +
+    '<div class="sl-card" style="max-width:420px;margin-top:16px">' +
+      '<label class="sl-label">รหัสห้อง (4 ตัวอักษร)</label>' +
+      '<input class="sl-input mono" id="pj-code" placeholder="ABCD" maxlength="4" value="' + currentCode + '" style="text-transform:uppercase;font-size:22px;text-align:center;letter-spacing:0.2em">' +
+      '<label class="sl-label" style="margin-top:14px">ชื่อของคุณ</label>' +
+      '<input class="sl-input" id="pj-name" placeholder="ชื่อเล่น" maxlength="16" value="' + currentName + '">' +
+      '<label class="sl-label" style="margin-top:14px">เลือกตัวละคร</label>' +
+      '<div class="sl-avatar-grid">'+avatars+'</div>' +
+      '<button class="sl-btn sl-btn-gold sl-btn-block" style="margin-top:18px" data-act="do-join">เข้าร่วมเกม</button>' +
+      '<button class="sl-btn sl-btn-ghost sl-btn-block" style="margin-top:8px" data-act="home">← กลับ</button>' +
+    '</div>' +
+  '</div>';
+}
 
   function viewPlayerGame(){
     var room = S.room;
