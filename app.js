@@ -5,13 +5,13 @@
   /* แก้ค่าด้านล่างนี้ให้เป็นของโปรเจกต์ Firebase ของคุณเอง
      (Firebase Console > Project settings > General > Your apps > SDK setup and configuration) */
   var firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyD-r5YTYtBFzBt5iYzrE3v9rlqQQlfmTXQ",
+    authDomain: "snake-ladder-game-797da.firebaseapp.com",
+    databaseURL: "https://snake-ladder-game-797da-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "snake-ladder-game-797da",
+    storageBucket: "snake-ladder-game-797da.firebasestorage.app",
+    messagingSenderId: "444028723937",
+    appId: "1:444028723937:web:fa21e0c3f4147c91754da0"
   };
 
   var db = null;
