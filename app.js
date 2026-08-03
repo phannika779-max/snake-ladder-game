@@ -23,9 +23,9 @@
   }
 
   /* ============ CONSTANTS ============ */
-  var LADDERS = {3:7, 4:14, 5:21, 6:28, 8:20, 9:27, 10:14, 15:27, 16:21, 19:27};      // bottom -> top (10 ladders = 10 question cells) — ทุกช่องขึ้นแถวบนกว่าจริง
-  var SNAKES  = {11:1, 12:2, 17:2, 18:1, 22:13, 23:1, 24:7, 25:1, 26:7, 29:14};       // head -> tail (10 snakes = 10 question cells) — ทุกช่องลงแถวล่างกว่าจริง
-  var BONUS   = {2:'extra', 13:'mystery', 20:'swap', 27:'mystery'};                   // รวม 20 ช่องคำถาม + 4 ช่องโบนัส + 5 ช่องปกติ (1,7,14,21,28) จาก 30 ช่อง
+  var LADDERS = {4:8, 5:17, 6:25, 7:34, 10:24, 11:32, 12:17, 18:32, 19:25, 23:32};    // bottom -> top (10 ladders = 10 question cells)
+  var SNAKES  = {13:1, 14:2, 20:2, 22:1, 26:16, 28:1, 29:8, 30:1, 31:8, 35:17};       // head -> tail (10 snakes = 10 question cells)
+  var BONUS   = {2:'extra', 16:'mystery', 24:'swap', 32:'mystery'};                   // รวม 20 ช่องคำถาม (10 บันได+10 งู) + 4 ช่องโบนัส + ช่องปกติที่เหลือ จาก 36 ช่อง
   var AVATARS = ['🐘','🐯','🦁','🐼','🐵','🐸','🦉','🐢','🦚','🐆'];
   var TOKEN_COLORS = ['#FFDB6B','#21B6B6','#FF6B5B','#B06FD6','#7ED957','#FF9F43','#5AD1FF','#F06FA0'];
   var SESSION_KEY = 'sl_session_v1';
@@ -73,11 +73,11 @@ function selectAvatar(avatar) {
     var rowFromBottom = Math.floor((num-1)/6);
     var posInRow = (num-1)%6;
     var col = (rowFromBottom % 2 === 0) ? posInRow : (5-posInRow);
-    var row = 5 - rowFromBottom;
+    var row = 6 - rowFromBottom;
     return {row: row, col: col+1};
   }
   function cellType(num){
-    if (num===30) return 'finish';
+    if (num===36) return 'finish';
     if (LADDERS[num]) return 'ladder';
     if (SNAKES[num]) return 'snake';
     if (BONUS[num]) return 'bonus';
@@ -89,6 +89,11 @@ function selectAvatar(avatar) {
     if (t==='snake') return '🐍';
     if (t==='finish') return '🏆';
     if (t==='bonus') return BONUS[num]==='extra' ? '⭐' : (BONUS[num]==='mystery' ? '🎁' : '🔀');
+    return '';
+  }
+  function cellDestLabel(num){
+    if (LADDERS[num]) return '↑ ไปช่อง '+LADDERS[num];
+    if (SNAKES[num]) return '↓ ตกช่อง '+SNAKES[num];
     return '';
   }
 
@@ -104,7 +109,8 @@ function selectAvatar(avatar) {
     draftQuestions: [],
     rollingAnim: false,
     lastAnswerResult: null,
-    _pickedAvatar: null
+    _pickedAvatar: null,
+    _pendingJoinCode: null
   };
 
   function uid8(){ return Math.random().toString(36).slice(2,10); }
@@ -113,6 +119,9 @@ function selectAvatar(avatar) {
     var c = '';
     for (var i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
     return c;
+  }
+  function joinLinkFor(code){
+    return window.location.origin + window.location.pathname + '?room=' + encodeURIComponent(code);
   }
 
   function toast(msg, ms){
@@ -231,9 +240,9 @@ function selectAvatar(avatar) {
     var to = from + dice;
     room.turn.lastRoll = dice;
 
-    if (to > 30){
-      pushLog(room, p.avatar+' '+p.name+' ทอยได้ '+dice+' แต้ม แต่เกินช่อง 30 ขยับไม่ได้');
-      toast(p.name+' ทอยได้ '+dice+' — เกินช่อง 30! อดขยับ 😅');
+    if (to > 36){
+      pushLog(room, p.avatar+' '+p.name+' ทอยได้ '+dice+' แต้ม แต่เกินช่อง 36 ขยับไม่ได้');
+      toast(p.name+' ทอยได้ '+dice+' — เกินช่อง 36! อดขยับ 😅');
       nextTurn(room);
       await saveRoom(room);
       return;
@@ -242,10 +251,10 @@ function selectAvatar(avatar) {
     p.pos = to;
     pushLog(room, p.avatar+' '+p.name+' ทอยได้ '+dice+' แต้ม เดินไปช่อง '+to);
 
-    if (to===30){
+    if (to===36){
       room.status = 'finished';
       room.winner = p.id;
-      pushLog(room, '🏆 '+p.avatar+' '+p.name+' ถึงช่อง 30 เป็นผู้ชนะ!');
+      pushLog(room, '🏆 '+p.avatar+' '+p.name+' ถึงช่อง 36 เป็นผู้ชนะ!');
       await saveRoom(room);
       return;
     }
@@ -282,7 +291,7 @@ function selectAvatar(avatar) {
     } else if (kind==='mystery'){
       var effects = ['fwd3','back2','extraTurn','swapRandom'];
       var pick = effects[Math.floor(Math.random()*effects.length)];
-      if (pick==='fwd3'){ p.pos = Math.min(29, p.pos+3); pushLog(room,'🎁 กล่องสุ่มให้โบนัส! เดินหน้า 3 ช่อง ไปช่อง '+p.pos); toast('🎁 จุ่มโดนของดี! เดินหน้า 3 ช่อง'); }
+      if (pick==='fwd3'){ p.pos = Math.min(35, p.pos+3); pushLog(room,'🎁 กล่องสุ่มให้โบนัส! เดินหน้า 3 ช่อง ไปช่อง '+p.pos); toast('🎁 จุ่มโดนของดี! เดินหน้า 3 ช่อง'); }
       else if (pick==='back2'){ p.pos = Math.max(0, p.pos-2); pushLog(room,'🎁 กล่องสุ่มแกล้ง! ถอยหลัง 2 ช่อง ไปช่อง '+p.pos); toast('🎁 จุ่มโดนของแกล้ง! ถอยหลัง 2 ช่อง'); }
       else if (pick==='extraTurn'){ pushLog(room,'🎁 กล่องสุ่มให้ตาพิเศษ! ทอยต่อได้อีกครั้ง'); toast('🎁 จุ่มโดนตาพิเศษ! ทอยอีกครั้ง'); room.turn.skipAdvance = true; }
       else {
@@ -325,9 +334,9 @@ function selectAvatar(avatar) {
       else { p.pos = SNAKES[aq.effectCell]; pushLog(room, '❌ '+p.name+' ตอบผิด โดนงูกัด ตกไปช่อง '+p.pos); toast('❌ ตอบผิด โดนงูกัด! ตกไปช่อง '+p.pos); }
     }
 
-    if (p.pos===30){
+    if (p.pos===36){
       room.status='finished'; room.winner=p.id;
-      pushLog(room,'🏆 '+p.avatar+' '+p.name+' ถึงช่อง 30 เป็นผู้ชนะ!');
+      pushLog(room,'🏆 '+p.avatar+' '+p.name+' ถึงช่อง 36 เป็นผู้ชนะ!');
     } else {
       nextTurn(room);
     }
@@ -406,14 +415,14 @@ function selectAvatar(avatar) {
   function resetToHome(){
     detachRoomListener();
     clearSession();
-    S.role=null; S.roomCode=null; S.playerId=null; S.room=null; S.draftQuestions=[];
+    S.role=null; S.roomCode=null; S.playerId=null; S.room=null; S.draftQuestions=[]; S._pendingJoinCode=null;
     render();
   }
 
   /* ============ RENDER: SHARED PIECES ============ */
   function renderBoardHTML(room){
     var cells = '';
-    for (var n=1;n<=30;n++){
+    for (var n=1;n<=36;n++){
       var t = cellType(n);
       var altClass = (Math.floor((n-1)/6)%2===0 ? (n%2===0?'alt':'') : (n%2===1?'alt':''));
       var pos = cellPos(n);
@@ -422,9 +431,11 @@ function selectAvatar(avatar) {
         var color = TOKEN_COLORS[room.players.indexOf(p)%TOKEN_COLORS.length];
         return '<span class="sl-token" style="background:'+color+'" title="'+p.name+'">'+p.avatar+'</span>';
       }).join('');
+      var destLabel = cellDestLabel(n);
       cells += '<div class="sl-cell '+t+' '+altClass+'" style="grid-row:'+pos.row+';grid-column:'+pos.col+'">'+
                 n+
                 '<span class="sl-cell-icon">'+cellIcon(n)+'</span>'+
+                (destLabel ? '<span class="sl-cell-dest">'+destLabel+'</span>' : '') +
                 '<div class="sl-tokens">'+tokensHtml+'</div>'+
                 '</div>';
     }
@@ -436,55 +447,18 @@ function selectAvatar(avatar) {
     var svg = document.getElementById('sl-svg-overlay');
     if (!board || !svg) return;
     var bRect = board.getBoundingClientRect();
-    function centerOf(n){
-      var pos = cellPos(n);
-      var cellW = (bRect.width-12-4*5)/6, cellH = (bRect.height-12-4*4)/5;
-      var x = 6 + (pos.col-1)*(cellW+4) + cellW/2;
-      var y = 6 + (pos.row-1)*(cellH+4) + cellH/2;
-      return {x:x,y:y};
-    }
     var svgns = 'http://www.w3.org/2000/svg';
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     svg.setAttribute('viewBox','0 0 '+bRect.width+' '+bRect.height);
-
-    Object.keys(LADDERS).forEach(function(k){
-      var a = centerOf(parseInt(k)), b = centerOf(LADDERS[k]);
-      var dx = b.x-a.x, dy = b.y-a.y, len = Math.sqrt(dx*dx+dy*dy);
-      var nx = -dy/len, ny = dx/len; var rail = 5;
-      [[-rail,rail],[rail,-rail]].forEach(function(off){
-        var line = document.createElementNS(svgns,'line');
-        line.setAttribute('x1', a.x+nx*off[0]); line.setAttribute('y1', a.y+ny*off[0]);
-        line.setAttribute('x2', b.x+nx*off[0]); line.setAttribute('y2', b.y+ny*off[0]);
-        line.setAttribute('stroke','#FFC93C'); line.setAttribute('stroke-width','3'); line.setAttribute('stroke-linecap','round');
-        svg.appendChild(line);
-      });
-      var rungs = 5;
-      for (var i=1;i<rungs;i++){
-        var t2=i/rungs;
-        var mx=a.x+dx*t2, my=a.y+dy*t2;
-        var line2 = document.createElementNS(svgns,'line');
-        line2.setAttribute('x1', mx+nx*-rail); line2.setAttribute('y1', my+ny*-rail);
-        line2.setAttribute('x2', mx+nx*rail); line2.setAttribute('y2', my+ny*rail);
-        line2.setAttribute('stroke','#B8860B'); line2.setAttribute('stroke-width','2.5');
-        svg.appendChild(line2);
-      }
-    });
-
-    Object.keys(SNAKES).forEach(function(k){
-      var a = centerOf(parseInt(k)), b = centerOf(SNAKES[k]);
-      var mx = (a.x+b.x)/2 + (a.y-b.y)*0.25, my=(a.y+b.y)/2 + (b.x-a.x)*0.25;
-      var path = document.createElementNS(svgns,'path');
-      path.setAttribute('d','M'+a.x+' '+a.y+' Q '+mx+' '+my+' '+b.x+' '+b.y);
-      path.setAttribute('stroke','#E0473F'); path.setAttribute('stroke-width','5'); path.setAttribute('fill','none'); path.setAttribute('stroke-linecap','round'); path.setAttribute('opacity','0.85');
-      svg.appendChild(path);
-    });
+    // ไม่วาดเส้นบันได/ตัวงูยาวพาดกระดานแล้ว — ใช้แค่ไอคอน 🪜🐍 มุมขวาล่าง
+    // และป้ายบอกช่องปลายทางที่มุมขวาบนของแต่ละช่อง (ดู cellIcon / cellDestLabel)
   }
 
   function renderQR(){
     var host = document.getElementById('sl-qrcode');
     if (!host) return;
     host.innerHTML = '';
-    var link = window.location.href;
+    var link = joinLinkFor(S.roomCode);
     try {
       var qr = qrcode(0, 'L');
       qr.addData(link);
@@ -500,7 +474,7 @@ function selectAvatar(avatar) {
   }
 
   async function copyLink(){
-    var link = window.location.href;
+    var link = joinLinkFor(S.roomCode);
     try { await navigator.clipboard.writeText(link); toast('คัดลอกลิงก์แล้ว ✅'); }
     catch(e){
       var ta = document.createElement('textarea');
@@ -517,7 +491,7 @@ function selectAvatar(avatar) {
     return '<div class="sl-wrap">' +
       '<span class="sl-eyebrow">🐍🪜 เกมกระดานคลาสสิก</span>' +
       '<h1 class="sl-title">บันไดงู ผจญภัย</h1>' +
-      '<p class="sl-sub">ทอยลูกเต๋า ตอบคำถามให้ถูก หนีงู ไต่บันได ใครถึงช่อง 30 ก่อนชนะ! เล่นได้หลายคนพร้อมกันผ่านมือถือ เหมือนเล่น Kahoot — ไม่ต้องสมัครสมาชิก</p>' +
+      '<p class="sl-sub">ทอยลูกเต๋า ตอบคำถามให้ถูก หนีงู ไต่บันได ใครถึงช่อง 36 ก่อนชนะ! เล่นได้หลายคนพร้อมกันผ่านมือถือ เหมือนเล่น Kahoot — ไม่ต้องสมัครสมาชิก</p>' +
       '<div class="sl-role-grid">' +
         '<div class="sl-role-card">' +
           '<div class="sl-role-emoji">🖥️</div><h3>ผู้ดำเนินเกม (Host)</h3>' +
@@ -597,6 +571,7 @@ function selectAvatar(avatar) {
       '<span><span class="sl-dot" style="background:#F0D3C8"></span>🐍 ช่องงู (คำถาม)</span>' +
       '<span><span class="sl-dot" style="background:#D6F7F5"></span>⭐🎁🔀 ช่องโบนัส</span>' +
       '<span><span class="sl-dot" style="background:linear-gradient(135deg,#FFDB6B,#FFC93C)"></span>🏆 ช่องชนะ</span>' +
+      '<span>🔖 ตัวเลขบนป้ายในแต่ละช่อง = ช่องปลายทางที่จะไปถ้าตอบถูก/ผิด</span>' +
     '</div>';
   }
 
@@ -641,7 +616,7 @@ function viewPlayerJoin(){
   var codeEl = document.getElementById('pj-code');
   var nameEl = document.getElementById('pj-name');
   
-  var currentCode = codeEl ? codeEl.value : '';
+  var currentCode = codeEl ? codeEl.value : (S._pendingJoinCode || '');
   var currentName = nameEl ? nameEl.value : '';
 
   // 2. สร้างปุ่มเลือก Avatar
@@ -708,7 +683,7 @@ function viewPlayerJoin(){
     }
 
     return '<div class="sl-wrap">' +
-      '<div class="sl-turn-banner">'+me.avatar+' คุณอยู่ที่ช่อง <b>&nbsp;'+me.pos+'&nbsp;</b> / 30</div>' +
+      '<div class="sl-turn-banner">'+me.avatar+' คุณอยู่ที่ช่อง <b>&nbsp;'+me.pos+'&nbsp;</b> / 36</div>' +
       body +
       '<div class="sl-card" style="margin-top:14px"><h3 style="margin-top:0;font-size:15px">อันดับ</h3><div class="sl-standings">'+standingsHTML(room)+'</div></div>' +
       '<button class="sl-btn sl-btn-ghost sl-btn-block" style="margin-top:14px" data-act="home">ออกจากเกม</button>' +
@@ -721,7 +696,7 @@ function viewPlayerJoin(){
     return '<div class="sl-wrap"><div class="sl-card sl-winbox">' +
       '<div class="emoji">🏆</div>' +
       '<h2 class="disp" style="font-size:28px">'+(w?w.avatar+' '+w.name:'ผู้เล่น')+' ชนะแล้ว!</h2>' +
-      '<p class="sl-sub" style="margin:8px auto 0">ถึงช่อง 30 เป็นคนแรก</p>' +
+      '<p class="sl-sub" style="margin:8px auto 0">ถึงช่อง 36 เป็นคนแรก</p>' +
       '<div class="sl-standings" style="max-width:340px;margin:18px auto 0;text-align:left">'+standingsHTML(room)+'</div>' +
       (isHost ? '<button class="sl-btn sl-btn-gold" style="margin-top:20px" data-act="play-again">เล่นอีกครั้ง (ห้องเดิม)</button>' : '<p style="margin-top:16px" class="sl-empty">รอโฮสต์เริ่มเกมใหม่...</p>') +
       '<div><span class="sl-backlink" data-act="home">← ออกจากเกม</span></div>' +
@@ -817,7 +792,20 @@ function viewPlayerJoin(){
   /* ============ BOOT ============ */
   async function boot(){
     S.booted = true;
+
+    // ถ้าลิงก์/QR มี ?room=CODE แปลว่าเข้ามาจากการแชร์ห้อง — พาไปหน้าร่วมเกมเลย พร้อมกรอกรหัสให้อัตโนมัติ
+    var urlParams = new URLSearchParams(window.location.search);
+    var roomFromUrl = (urlParams.get('room') || '').toUpperCase().trim();
+
     var session = loadSession();
+
+    // ถ้ารหัสห้องจาก URL ไม่ตรงกับห้องเดิมที่เคยค้าง session ไว้ (เช่น สแกน QR ห้องใหม่ทั้งที่เคยเข้าห้องเก่ามาก่อน)
+    // ให้ล้าง session เก่าทิ้งก่อน จะได้ไม่ถูกดึงกลับไปห้องเก่าโดยอัตโนมัติ
+    if (roomFromUrl && session && session.roomCode !== roomFromUrl){
+      clearSession();
+      session = null;
+    }
+
     if (session && session.roomCode){
       var room = await loadRoomOnce(session.roomCode);
       if (room && (session.role!=='player' || room.players.some(function(p){ return p.id===session.playerId; }))){
@@ -829,6 +817,14 @@ function viewPlayerJoin(){
         clearSession();
       }
     }
+
+    if (roomFromUrl){
+      S._pendingJoinCode = roomFromUrl;
+      S.role = 'player';
+      S.roomCode = null;
+      S.playerId = null;
+    }
+
     render();
   }
 
