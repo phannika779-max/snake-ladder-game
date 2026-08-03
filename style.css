@@ -129,10 +129,10 @@
 .sl-board {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(5, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
   gap: 4px;
-  aspect-ratio: 6 / 5;
+  aspect-ratio: 1 / 1;
   width: 100%;
   background: #072252;
   border: 6px solid #0B2C63;
@@ -142,13 +142,14 @@
 }
 .sl-cell {
   position: relative;
+  min-width: 0; min-height: 0;
   border-radius: 6px;
   background: var(--parchment);
   display: flex; align-items: flex-start; justify-content: flex-start;
   padding: 4px 5px;
   font-family: 'IBM Plex Mono'; font-weight: 700; font-size: clamp(10px,1.6vw,13px);
   color: var(--ink-soft);
-  overflow: visible;
+  overflow: hidden;
 }
 .sl-cell.alt { background: var(--parchment-dim); }
 .sl-cell.ladder { outline: 2px solid var(--gold); outline-offset: -2px; background: #F4E4A8; }
@@ -156,6 +157,16 @@
 .sl-cell.bonus { outline: 2px dashed #21B6B6; outline-offset: -2px; background: #D6F7F5; }
 .sl-cell.finish { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #2a2205; }
 .sl-cell-icon { position: absolute; right: 3px; bottom: 2px; font-size: clamp(11px,2.2vw,16px); }
+.sl-cell-dest {
+  position: absolute; top: 2px; right: 3px; left: 3px;
+  font-size: clamp(6px,1.05vw,8px); font-weight: 700; line-height: 1.1;
+  background: rgba(11,36,71,0.82); color: #fff;
+  padding: 1px 3px; border-radius: 5px;
+  text-align: right; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.sl-cell.snake .sl-cell-dest { background: rgba(224,71,63,0.85); }
+.sl-cell.ladder .sl-cell-dest { background: rgba(184,134,11,0.85); }
 .sl-tokens { position: absolute; left: 2px; bottom: 2px; display: flex; gap: 1px; flex-wrap: wrap; max-width: 90%; }
 .sl-token {
   width: clamp(14px,3.2vw,22px); height: clamp(14px,3.2vw,22px); border-radius: 50%;
