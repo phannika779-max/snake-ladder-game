@@ -23,8 +23,8 @@
   }
 
   /* ============ CONSTANTS ============ */
-  var LADDERS = {4:8, 5:17, 6:25, 7:34, 10:24, 11:32, 12:17, 18:32, 19:25, 23:32};    // bottom -> top (10 ladders = 10 question cells)
-  var SNAKES  = {13:1, 14:2, 20:2, 22:1, 26:16, 28:1, 29:8, 30:1, 31:8, 35:17};       // head -> tail (10 snakes = 10 question cells)
+  var LADDERS = {3:11, 5:15, 8:14, 10:22, 16:23, 19:27, 21:28, 25:32, 29:33, 30:35};    // bottom -> top (10 ladders = 10 question cells)
+  var SNAKES  = {9:2, 13:4, 17:7, 20:11, 24:15, 26:18, 31:22, 33:27, 34:16, 35:23};       // head -> tail (10 snakes = 10 question cells)
   var BONUS   = {2:'extra', 16:'mystery', 24:'swap', 32:'mystery'};                   // รวม 20 ช่องคำถาม (10 บันได+10 งู) + 4 ช่องโบนัส + ช่องปกติที่เหลือ จาก 36 ช่อง
   var AVATARS = ['🐘','🐯','🦁','🐼','🐵','🐸','🦉','🐢','🦚','🐆'];
   var TOKEN_COLORS = ['#FFDB6B','#21B6B6','#FF6B5B','#B06FD6','#7ED957','#FF9F43','#5AD1FF','#F06FA0'];
