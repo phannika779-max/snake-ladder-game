@@ -489,9 +489,9 @@ function selectAvatar(avatar) {
   /* ============ VIEWS ============ */
   function viewHome(){
     return '<div class="sl-wrap">' +
-      '<span class="sl-eyebrow">🐍🪜 เกมกระดานคลาสสิก</span>' +
-      '<h1 class="sl-title">บันไดงู ผจญภัย</h1>' +
-      '<p class="sl-sub">ทอยลูกเต๋า ตอบคำถามให้ถูก หนีงู ไต่บันได ใครถึงช่อง 36 ก่อนชนะ! เล่นได้หลายคนพร้อมกันผ่านมือถือ เหมือนเล่น Kahoot — ไม่ต้องสมัครสมาชิก</p>' +
+      '<span class="sl-eyebrow">วขอ.</span>' +
+      '<h1 class="sl-title">เกมส์บันไดงู</h1>' +
+      '<p class="sl-sub">ทอยลูกเต๋า และตอบคำถามให้ถูก หนีงู ไต่บันได ใครถึงช่อง 36 ก่อนชนะ! </p>' +
       '<div class="sl-role-grid">' +
         '<div class="sl-role-card">' +
           '<div class="sl-role-emoji">🖥️</div><h3>ผู้ดำเนินเกม (Host)</h3>' +
